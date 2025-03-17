@@ -36,7 +36,7 @@ from ray.data._internal.datasource.image_datasource import (
     ImageFileMetadataProvider,
 )
 from ray.data._internal.datasource.json_datasource import JSONDatasource
-from ray.data._internal.datasource.lance_datasource import LanceDatasource
+from ray.data._internal.datasource.lance_datasource import (LanceDatasource, ReadMode)
 from ray.data._internal.datasource.mongo_datasource import MongoDatasource
 from ray.data._internal.datasource.numpy_datasource import NumpyDatasource
 from ray.data._internal.datasource.parquet_bulk_datasource import ParquetBulkDatasource
@@ -3406,6 +3406,7 @@ def read_lance(
     ray_remote_args: Optional[Dict[str, Any]] = None,
     concurrency: Optional[int] = None,
     override_num_blocks: Optional[int] = None,
+    read_mode: Optional[str] = "row",
 ) -> Dataset:
     """
     Create a :class:`~ray.data.Dataset` from a
@@ -3452,6 +3453,7 @@ def read_lance(
         filter=filter,
         storage_options=storage_options,
         scanner_options=scanner_options,
+        read_mode=read_mode,
     )
 
     return read_datasource(
