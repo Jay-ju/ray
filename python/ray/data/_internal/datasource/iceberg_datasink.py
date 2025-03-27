@@ -86,8 +86,24 @@ class IcebergDatasink(Datasink[List["DataFile"]]):
     def on_write_start(self) -> None:
         """Prepare for the transaction"""
         from pyiceberg.table import PropertyUtil, TableProperties
+        from pyiceberg.exceptions import NoSuchTableError
 
         catalog = self._get_catalog()
+        
+        # Attempt to load existing table or create a new one
+        try:
+            table = catalog.load_table(self.table_identifier)
+        except NoSuchTableError:
+            # Validate required parameters for table creation
+            if not hasattr(self, 'schema'):
+                raise ValueError("Schema must be defined to create a new Iceberg table.")
+
+            # Create table with default properties if not provided
+            table = catalog.create_table(
+                identifier=self.table_identifier,
+                schema=self.schema,
+            )
+        
         table = catalog.load_table(self.table_identifier)
         self._txn = table.transaction()
         self._io = self._txn._table.io
